@@ -1,6 +1,6 @@
 # Certificate hierarchy
 
-This is the file layout I use to build certificates for my websites.
+This is the file layout I use to build certificates for my websites. The underlying rules in the Makefiles are based in GnuTLS. For this application there's really not much of a difference with OpenSSL. My choice was based on how easy is to configure the resulting CSRs.
 
 Each domain name should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
 

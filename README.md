@@ -14,7 +14,7 @@ Then, edit the file `my.domain/template.conf` to customize the parameters of you
 
 ```bash
 $ make
-make -C athena.pics
+make -C my-domain
 /usr/local/bin/gnutls-certtool --generate-privkey --outfile cert-0.key
 Generating a 3072 bit RSA private key...
 /usr/local/bin/gnutls-certtool --load-privkey cert-0.key --pubkey-info --outfile cert-0.pub

@@ -1,0 +1,8 @@
+*.*
+!.gitignore
+!Makefile
+!Makefile.sub
+!README.md
+!lem.click
+!lem.click/template.conf
+|Makefile.sub

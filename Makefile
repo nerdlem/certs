@@ -19,7 +19,7 @@ clean:
 	for p in $(SUBDIRS); do $(MAKE) -C $$p clean; done
 
 upload: $(SUBDIRS)
-	$(RSYNC) -avPR                                    \
-		$(foreach p,$(SUBDIRS),./$(p)/cert-0.*)       \
-		$(foreach p,$(SUBDIRS),./$(p)/cert-[1-9].pub) \
+	$(RSYNC) -avPR                                  \
+		$(foreach p,$(SUBDIRS),$(p)/cert-0.*)       \
+		$(foreach p,$(SUBDIRS),$(p)/cert-[1-9].pub) \
 		$(RUSER)@$(HOST):$(LESEED)/

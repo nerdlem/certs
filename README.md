@@ -31,3 +31,28 @@ After a few seconds, you should have 4 groups of CSRs, public and private keys s
 
 Key parameters can be tweaked in the `Makefile.sub` file. You can have multiple directory names representing multiple domains. This is useful to keep all your keys on a single location.
 
+With a suitable SSH configuration, you can easily upload the required material to your server as follows:
+
+```bash
+make HOST=my.server.name upload
+   ⋮
+/usr/bin/rsync -avPR               \
+		./lem.click/cert-0.* ⋯   \
+		./lem.click/cert-?.pub ⋯ \
+		root@background:/etc/letsencrypt/seed/
+building file list ...
+   ⋮
+lem.click/
+lem.click/cert-0.csr
+        4372 100%    4.17MB/s    0:00:00 (xfer#7, to-check=33/45)
+lem.click/cert-0.key
+        8399 100%    8.01MB/s    0:00:00 (xfer#8, to-check=32/45)
+lem.click/cert-0.pub
+        2237 100%    2.13MB/s    0:00:00 (xfer#9, to-check=31/45)
+lem.click/cert-1.pub
+        2237 100%    2.13MB/s    0:00:00 (xfer#10, to-check=29/45)
+lem.click/cert-2.pub
+        2237 100%    2.13MB/s    0:00:00 (xfer#11, to-check=28/45)
+lem.click/cert-3.pub
+        2237 100%    1.07MB/s    0:00:00 (xfer#12, to-check=27/45)
+```

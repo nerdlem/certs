@@ -1,0 +1,33 @@
+# Generate a set of keys and certificate signing requests using the same
+# parameters so that keys can be pinned in advance.
+#
+# © 2017 Luis E. Muñoz -- All Rights Reserved
+
+# Parameters -- Point this to GnuTLS's certtool
+
+GNUTLS=/usr/bin/certtool
+# GNUTLS=/usr/local/bin/gnutls-certtool
+
+# One suffix per key set
+
+SUFFIX=0 1 2 3
+
+# How to generate key pairs and CSRs using Makefile rules
+
+%.csr: %.key template.conf
+	$(GNUTLS) --generate-request --load-privkey $< --template template.conf --outfile $@
+
+%.key: template.conf
+	$(GNUTLS) --generate-privkey --outfile $@
+	$(GNUTLS) --load-privkey $@ --pubkey-info --outfile $(basename $@).pub
+
+# Do not remove the key files automatically
+
+.SECONDARY: $(foreach c,$(SUFFIX),cert-$(c).key)
+
+all: $(foreach c,$(SUFFIX),cert-$(c).csr)
+
+clean: 
+	$(RM) *.csr *.key *.pub
+
+

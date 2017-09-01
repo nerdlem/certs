@@ -27,14 +27,15 @@ upload: $(SUBDIRS)
 
 preserve: $(SUBDIRS)
 	tar cf - $(foreach p,$(SUBDIRS),$(p)/cert-*.key) \
-		| gpg --encrypt --armor --recipient $(GPGRECIPIENT) > privkeys.tar.gpg
+		| gpg --encrypt --armor --recipient $(GPGRECIPIENT) > privkeys.tar.gpg \
+		|| exit 255
 	@echo
 	@echo Keep the privkeys.tar.gpg in a safe place. This file contains the
 	@echo private keys for all of your certificates. If you lose or compromised
 	@echo this file, certificates based in these keys will no longer be secure.
 
 save-keys: preserve privkeys.tar.gpg
-	[ -z privkeys.tar.gpg ] && exit 255
+	[ -s privkeys.tar.gpg ] || exit 255
 	$(RM) $(foreach p,$(SUBDIRS),$(p)/cert-*.key)
 	@echo
 	@echo Private keys have been deleted as they are stored in the

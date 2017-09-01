@@ -2,13 +2,14 @@
 #
 # © 2017 Luis E. Muñoz -- All Rights Reserved
 
-SUBDIRS = $(shell find . -mindepth 1 -maxdepth 1 -type d -name '[a-z]*.*')
-RSYNC   = /usr/bin/rsync
-RUSER   = root
-HOST    = server
-LESEED  = /etc/letsencrypt/seed
+SUBDIRS      = $(shell find . -mindepth 1 -maxdepth 1 -type d -name '[a-z]*.*')
+RSYNC        = /usr/bin/rsync
+RUSER        = root
+HOST         = server
+LESEED       = /etc/letsencrypt/seed
+GPGRECIPIENT = me@lem.click
 
-.PHONY: all clean $(SUBDIRS)
+.PHONY: all clean preserve save-keys $(SUBDIRS)
 
 all: $(SUBDIRS)
 
@@ -23,3 +24,19 @@ upload: $(SUBDIRS)
 		$(foreach p,$(SUBDIRS),$(p)/cert-0.*)       \
 		$(foreach p,$(SUBDIRS),$(p)/cert-[1-9].pub) \
 		$(RUSER)@$(HOST):$(LESEED)/
+
+preserve: $(SUBDIRS)
+	tar cf - $(foreach p,$(SUBDIRS),$(p)/cert-*.key) \
+		| gpg --encrypt --armor --recipient $(GPGRECIPIENT) > privkeys.tar.gpg
+	@echo
+	@echo Keep the privkeys.tar.gpg in a safe place. This file contains the
+	@echo private keys for all of your certificates. If you lose or compromised
+	@echo this file, certificates based in these keys will no longer be secure.
+
+save-keys: preserve privkeys.tar.gpg
+	[ ! -z privkeys.tar.gpg ] && $(RM) $(foreach p,$(SUBDIRS),$(p)/cert-*.key)
+	@echo
+	@echo Private keys have been deleted as they are stored in the
+	@echo privkeys.tar.gpg archive. If you lose this file, your replacement
+	@echo certificates are no longer usable.
+

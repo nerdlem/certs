@@ -34,7 +34,8 @@ preserve: $(SUBDIRS)
 	@echo this file, certificates based in these keys will no longer be secure.
 
 save-keys: preserve privkeys.tar.gpg
-	[ ! -z privkeys.tar.gpg ] && $(RM) $(foreach p,$(SUBDIRS),$(p)/cert-*.key)
+	[ -z privkeys.tar.gpg ] && exit 255
+	$(RM) $(foreach p,$(SUBDIRS),$(p)/cert-*.key)
 	@echo
 	@echo Private keys have been deleted as they are stored in the
 	@echo privkeys.tar.gpg archive. If you lose this file, your replacement

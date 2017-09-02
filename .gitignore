@@ -1,3 +1,6 @@
+# This style of .gitignore is a "deny by default", so that real key material
+# can be kept here and not pushed to a (public) repo.
+
 *.*
 !.gitignore
 !Makefile
@@ -5,4 +8,6 @@
 !README.md
 !lem.click
 !lem.click/template.conf
-|Makefile.sub
+!Makefile.sub
+!*.sh
+

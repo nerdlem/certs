@@ -18,6 +18,7 @@ export ACTIVECERT=${ACTIVECERT:=cert-0}
 export VERBOSE=${VERBOSE:=''}
 export CERTOWNER=${CERTOWNER:=smmta:certs}
 export CERTPERMS=${CERTPERMS:=o-rwx}
+export FINDOPTS=${FINDOPTS:=}
 
 export SSLCERTCHECK=${SSLCERTCHECK:=/usr/bin/ssl-cert-check}
 export CERTBOT=${CERTBOT:=/usr/bin/certbot}
@@ -146,7 +147,7 @@ export -f check_and_issue
 # speed up the processing. However the non-parallel approach works well for
 # tens of certificates.
 
-find ${SEEDPATH} -mindepth 1 -maxdepth 1 -type d \
+find ${SEEDPATH} -mindepth 1 -maxdepth 1 -type d ${FINDOPTS}\
   | xargs -L1 -I{} bash -c "check_and_issue {}"
 
 # If certificates were processed successfuly, restart the services that use

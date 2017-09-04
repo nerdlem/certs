@@ -127,12 +127,12 @@ check_and_issue() {
       chmod ${CERTPERMS} *.pem ${seedpath}/${ACTIVECERT}.key
 
       echo YES >> ${TEMPFILE}
+
+      # Leave the current set of certificates ready to go
+
+      rm -rf ${livepath}
+      ln -s ${issuepath} ${livepath}
     )
-
-    # Leave the current set of certificates ready to go
-
-    rm -rf ${livepath}
-    ln -s ${issuepath} ${livepath}
 
   fi
 }

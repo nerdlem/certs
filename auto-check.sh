@@ -12,8 +12,7 @@ export LIVEPATH=${LIVEPATH:=${LEROOT}/live}
 export SEEDFILE=${SEEDFILE:=`mktemp`}
 export MINDAYS=${MINDAYS:=30}
 
-find ${LIVEPATH} -mindepth 1 -maxdepth 1 -type d \
+find ${LIVEPATH} -mindepth 1 -maxdepth 1 \
   | sed -e 's,^.*/,,' -e 's,$, 443,' > ${SEEDFILE}
 
 ${SSLCERTCHECK} -x ${MINDAYS} -f ${SEEDFILE} -q -a -e certificates@lem.click
-

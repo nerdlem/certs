@@ -17,7 +17,7 @@ SUFFIX=0 1 2 3
 %.csr: %.key template.conf
 	$(GNUTLS) --generate-request --load-privkey $< --template template.conf --outfile $@
 
-%.key: template.conf
+%.key:
 	$(GNUTLS) --generate-privkey --outfile $@
 	$(GNUTLS) --load-privkey $@ --pubkey-info --outfile $(basename $@).pub
 

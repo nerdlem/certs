@@ -4,7 +4,7 @@
 # performs DNS-01 chanllenge authentication via RFC-2136 dynamic #updates
 # managed via the nsupdate tool.
 #
-# © 2017 Luis E. Muñoz -- All Rights Reserved
+# © 2017-2018 Luis E. Muñoz -- All Rights Reserved
 
 set -e
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin

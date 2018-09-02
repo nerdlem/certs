@@ -1,8 +1,16 @@
 # Certificate hierarchy
 
-This is the file layout I use to build certificates for my websites. The underlying rules in the Makefiles are based in GnuTLS. For this application there's really not much of a difference with OpenSSL. My choice was based on how easy is to configure the resulting CSRs.
+This is the file layout I use to manage key material for X509 certificate management. You should keep these files in a secure computer separate from the servers where you intend to use your certificates. Remember that compromising your private keys is worse than accidentally posting your password online.
 
-Each domain name should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
+The underlying rules in the Makefiles are based in GnuTLS. For this application there's really not much of a difference with OpenSSL. My choice was based on how easy is to configure the resulting CSRs.
+
+Please see these posts for more information on how I use this:
+
+* [Wildcard certificates with Let's Encrypt](https://lem.click/post/wildcard-certificates-with-letsencrypt/)
+* [Certificate Rotation with Let's Encrypt](https://lem.click/post/certificate-rotation-with-letsencrypt/)
+* [Multiple certs with Certbot](https://lem.click/post/multiple-certs-with-certbot/)
+
+Each domain name for which you intent to have a certificate, should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
 
 ```bash
 $ mkdir my.domain
@@ -56,3 +64,23 @@ lem.click/cert-2.pub
 lem.click/cert-3.pub
         2237 100%    1.07MB/s    0:00:00 (xfer#12, to-check=27/45)
 ```
+
+# Safekeeping your key material
+
+The supplied `Makefile` includes targets `preserve` and `save-keys` that will assist in producing encrypted backups of your key material, for safekeeping. Note the setting of `GPGRECIPIENT` to select the GPG key to encrypt your backup to.
+
+```bash
+make GPGRECIPIENT=lem@lem.click preserve
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -C lem.click
+make[1]: Nothing to be done for `all'.
+tar cf - ./lem.click/cert-*.key \
+		| gpg --encrypt --armor --recipient lem@lem.click > privkeys.tar.gpg \
+		|| exit 255
+⋮
+
+Keep the privkeys.tar.gpg in a safe place. This file contains the
+private keys for all of your certificates. If you lose or compromised
+this file, certificates based in these keys will no longer be secure.
+```
+
+The resulting `.gpg` file should now be stored in a safe place, in case that the key material needs to be restored for any purpose.

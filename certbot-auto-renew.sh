@@ -3,22 +3,28 @@
 # certbot-auto-renew.sh -- automate certificate renewal and service restarting
 # with a constant CSR / privkey / pubkey to ease key pinning applications.
 #
-# © 2017 Luis E. Muñoz -- All Rights Reserved
+# © 2017-2018 Luis E. Muñoz -- All Rights Reserved
 
 set -e
 
 export LEROOT=${LEROOT:=/etc/letsencrypt}
-export LIVEPATH=${LIVEPATH:=${LEROOT}/live}
-export SEEDPATH=${SEEDPATH:=${LEROOT}/seed}
-export ISSUEPATH=${ISSUEPATH:=${LEROOT}/issue}
-export WEBROOT=${WEBROOT:=${LEROOT}/webroot}
-export CERTBOT=${CERTBOT:=/usr/bin/certbot}
-export MINDAYS=${MINDAYS:=30}
+
+export ACME_SERVER=${ACME_SERVER:=https://acme-v02.api.letsencrypt.org/directory}
 export ACTIVECERT=${ACTIVECERT:=cert-0}
-export VERBOSE=${VERBOSE:=''}
+export CERTBOT=${CERTBOT:=/usr/bin/certbot}
 export CERTOWNER=${CERTOWNER:=smmta:certs}
 export CERTPERMS=${CERTPERMS:=o-rwx}
+export EMAIL=${EMAIL:=certbot@lem.click}
 export FINDOPTS=${FINDOPTS:=}
+export HOOK=${HOOK:=/usr/local/bin/nsupdate-hook.sh}
+export ISSUEPATH=${ISSUEPATH:=${LEROOT}/issue}
+export LIVEPATH=${LIVEPATH:=${LEROOT}/live}
+export MASTER=${MASTER:=}
+export MINDAYS=${MINDAYS:=30}
+export SEEDPATH=${SEEDPATH:=${LEROOT}/seed}
+export TSIGFILE=${TSIGFILE:=/etc/bind/mykey.conf}
+export VERBOSE=${VERBOSE:=''}
+export WEBROOT=${WEBROOT:=${LEROOT}/webroot}
 
 export SSLCERTCHECK=${SSLCERTCHECK:=/usr/bin/ssl-cert-check}
 export CERTBOT=${CERTBOT:=/usr/bin/certbot}
@@ -50,8 +56,6 @@ check_and_issue() {
   current_cert=${livepath}/cert.pem
   new_cert=${issuepath}/cert.pem
 
-  certbot_params=`cat ${WEBROOT}/${certname}/certbot-params 2>/dev/null`
-
   if [ ! -z "${VERBOSE}" ]; then
     echo ${WEBROOT}/${certname}/certbot-params
     echo livepath=$livepath
@@ -60,13 +64,12 @@ check_and_issue() {
     echo csr=$csr
     echo new_cert=$new_cert
     echo certname=$certname
-    echo certbot-params=${certbot_params}
     echo
     echo
   fi
 
   # If the certificate is not due to expire before $MINDAYS, then safely skip
-  
+
   if [ ! -f ${current_cert} ] \
     || ${SSLCERTCHECK} -b -x ${MINDAYS} -c ${current_cert} | egrep 'Expiring'
   then
@@ -79,21 +82,29 @@ check_and_issue() {
       exit 255
     fi
 
-    # Get the current CSR signed. Use the root symlink to point the the
-    # webroot to use for authorization. Place the result in a temporary
-    # location
+    # Get the current CSR signed with dns-01 authentication. Place the result in
+    # a temporary location.
 
     mkdir -p ${issuepath}
     (
       cd ${issuepath}
 
-      if ! ${CERTBOT} certonly --non-interactive         \
-                               --quiet                   \
-                               --keep-until-expiring     \
-                               --csr "${csr}"            \
-                               --cert-name "${certname}" \
-                               --cert-path "${new_cert}" \
-                               ${certbot_params}
+      if ! ${CERTBOT} certonly        \
+        --agree-tos                   \
+        --cert-name "${certname}"     \
+        --cert-path "${new_cert}"     \
+        --csr "${csr}"                \
+        --keep-until-expiring         \
+        -m ${EMAIL}                   \
+        --manual                      \
+        --manual-auth-hook ${HOOK}    \
+        --manual-cleanup-hook ${HOOK} \
+        --manual-public-ip-logging-ok \
+        --non-interactive             \
+        --preferred-challenges dns-01 \
+        --quiet                       \
+        --reuse-key                   \
+        --server ${ACME_SERVER}
       then
         echo ${CERTBOT} failed to issue a certificate
         exit 255
@@ -120,7 +131,7 @@ check_and_issue() {
       fi
 
       # Add symlink to the privkey
-      
+
       ln -s ${seedpath}/${ACTIVECERT}.key privkey.pem
 
       chown ${CERTOWNER} *.pem ${seedpath}/${ACTIVECERT}.key
@@ -134,6 +145,10 @@ check_and_issue() {
       ln -s ${issuepath} ${livepath}
     )
 
+  else
+    if [ ! -z "${VERBOSE}" ]; then
+      echo Intentionally skipping $certname
+    fi
   fi
 }
 
@@ -142,7 +157,7 @@ export -f check_and_issue
 # Iterate over the list of domains for which we'll need to perform
 # verification / issuing. We use this form of command invocation to ensure we
 # can process a huge number of certificate directories if we needed to.
-# 
+#
 # We could also use GNU parallel(1) for large numbers of certificates, to
 # speed up the processing. However the non-parallel approach works well for
 # tens of certificates.
@@ -160,4 +175,3 @@ if [ -s ${TEMPFILE} ]; then
 fi
 
 rm -f ${TEMPFILE}
-

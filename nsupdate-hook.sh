@@ -11,10 +11,14 @@ PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 # Configuration parameters / where to find tools
 
-NSUPDATE=${NSUPDATE:=`which nsupdate`}
-NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
-TSIGKEYFILE=${TSIGKEYFILE:=~/mykey.conf}
+DIG=${DIG:=/usr/bin/dig}
+GREP=${GREP:=/bin/grep}
 MASTER=${MASTER:=}
+NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
+NSUPDATE=${NSUPDATE:=`which nsupdate`}
+TSIGKEYFILE=${TSIGKEYFILE:=~/mykey.conf}
+FOREIGNNS=${FOREIGNNS:=8.8.8.8}
+TTL=${TTL:=5}
 
 # Prerequisite checking code below
 
@@ -37,6 +41,8 @@ function check_prerreq {
   fi
 }
 
+check_prerreq dig      "${DIG}"
+check_prerreq grep     "${GREP}"
 check_prerreq nsupdate "${NSUPDATE}"
 
 if [ ! -f "${TSIGKEYFILE}" ]; then
@@ -60,18 +66,46 @@ fi
 challenge="_acme-challenge.${CERTBOT_DOMAIN}"
 
 function perform_cleanup {
-  (  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
+  if (  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
     echo "update delete ${challenge} ${TXT}";
     echo send
   ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
+  then
+    if [ "${VERBOSE}" == "" ]; then
+      echo Removed challenge ${challenge}
+    fi
+  else
+    echo Failed to remove challenge ${challenge}
+  fi
 }
 
 function perform_authorization {
-    (
-      [ "${MASTER}" != "" ] || echo "server ${MASTER}";
-      echo "update add ${challenge} 0 TXT ${CERTBOT_VALIDATION}";
-      echo send
-    ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
+  if (
+    [ "${MASTER}" == "" ] || echo "server ${MASTER}";
+    echo "update add ${challenge} ${TTL} TXT ${CERTBOT_VALIDATION}";
+    echo send
+  ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
+  then
+    if [ "${VERBOSE}" == "" ]; then
+      echo Added challenge ${challenge}
+    fi
+
+    while :; do
+      if ${DIG} +short IN TXT ${challenge} @${FOREIGNNS} | ${GREP} "${CERTBOT_VALIDATION}" > /dev/null; then
+        if [ "${VERBOSE}" == "" ]; then
+          echo "Validation of ${challenge} was successful"
+        fi
+        return
+      else
+        echo "Failed validation for ${challenge} -- retrying"
+        sleep 1;
+      fi
+    done
+
+  else
+    echo Failed to add challenge ${challenge}
+    exit 255
+  fi
 }
 
 if [ "${CERTBOT_AUTH_OUTPUT}" == "" ]; then

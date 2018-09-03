@@ -16,7 +16,7 @@ GREP=${GREP:=/bin/grep}
 LOGGER=${LOGGER:=/usr/bin/logger}
 NSUPDATE=${NSUPDATE:=`which nsupdate`}
 
-LOGGER_OPTS=${LOGGER_OPTS:=-s -p local3.info -t nsupdate-hook}
+LOGGER_OPTS=${LOGGER_OPTS:=-p local3.info -t nsupdate-hook}
 NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
 
 FOREIGNNS=${FOREIGNNS:=8.8.8.8}
@@ -102,8 +102,8 @@ function verify_authorization {
   for ns in `cat "${nslist}"`; do
     if ${DIG} +short IN TXT ${challenge} @${ns} | ${GREP} -F "${token}" > /dev/null
     then
+      ${LOGGER} ${LOGGER_OPTS} "validation of ${challenge} ${token} via ${ns} successful"
       if [ "${VERBOSE}" == "" ]; then
-        ${LOGGER} ${LOGGER_OPTS} "validation of ${challenge} ${token} via ${ns} successful"
         echo "Validation of ${challenge} via ${ns} was successful"
       fi
     else

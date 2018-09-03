@@ -19,6 +19,7 @@ export NSUPDATE=${NSUPDATE:=`which nsupdate`}
 export NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
 export TSIGKEYFILE=${TSIGKEYFILE:=~/mykey.conf}
 export MASTER=${MASTER:=}
+export GNUTLS=${GNUTLS:=/usr/bin/certtool}
 
 function clear_acme {
   # Capture the SEED directory we're required to work with
@@ -26,15 +27,25 @@ function clear_acme {
 
   # The certificate name should be the last component of the path name we
   # were just passed. By convention, this will match the domain name.
-  domain=`echo $seedpath | sed -e 's,^.*/,,'`
+  domainfile="/tmp/clear-well-known.$$.${RANDOM}"
 
-  echo "Removing existing ACME challenges on ${domain}"
+  for csr in "${seedpath}"/*.csr; do
+    ${GNUTLS} --crq-info < "${csr}" | \
+    egrep 'CN=|DNSname:' | \
+    sed -e 's/^.*CN=//' -e 's/^.*DNSname: //' -e's/\*\.//'
+  done | sort -u > ${domainfile}
 
-  ((  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
-      echo "update delete _acme-challenge.${domain} ${TXT}";
-      echo send
-  ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}) || \
-  echo "Cleanup on ${domain} failed"
+  for domain in `cat ${domainfile}`; do
+    echo "Removing existing ACME challenges on ${domain}"
+
+    ((  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
+        echo "update delete _acme-challenge.${domain} ${TXT}";
+        echo send
+    ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}) || \
+    echo "Cleanup on ${domain} failed"
+  done
+
+  rm -f ${domainfile}
 }
 
 export -f clear_acme

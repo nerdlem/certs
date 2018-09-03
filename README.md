@@ -72,7 +72,7 @@ The supplied `Makefile` includes targets `preserve` and `save-keys` that will as
 ```bash
 make GPGRECIPIENT=lem@lem.click preserve
 /Applications/Xcode.app/Contents/Developer/usr/bin/make -C lem.click
-make[1]: Nothing to be done for `all'.
+make[1]: Nothing to be done for 'all'.
 tar cf - ./lem.click/cert-*.key \
 		| gpg --encrypt --armor --recipient lem@lem.click > privkeys.tar.gpg \
 		|| exit 255
@@ -84,3 +84,7 @@ this file, certificates based in these keys will no longer be secure.
 ```
 
 The resulting `.gpg` file should now be stored in a safe place, in case that the key material needs to be restored for any purpose.
+
+# Clearing pre-existing ACME challenges
+
+To assist with DNS zone hygiene, the included `clear-well-known.sh` script will delete all existing TXT DNS records under the `_acme-challenge` subdomain with configuration under `/etc/letsencrypt/seed`.

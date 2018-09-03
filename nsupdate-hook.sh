@@ -108,6 +108,10 @@ function perform_authorization {
   fi
 }
 
+if [ "${VERBOSE}" == "" ]; then
+  echo "nsupdate-hook: domain=${CERTBOT_DOMAIN} validation=${CERTBOT_VALIDATION}"
+fi
+
 if [ "${CERTBOT_AUTH_OUTPUT}" == "" ]; then
   perform_authorization
 else

@@ -60,7 +60,7 @@ fi
 challenge="_acme-challenge.${CERTBOT_DOMAIN}"
 
 function perform_cleanup {
-  (  [ "${MASTER}" != "" ] || echo "server ${MASTER}";
+  (  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
     echo "update delete ${challenge} ${TXT}";
     echo send
   ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}

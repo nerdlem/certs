@@ -79,7 +79,7 @@ check_and_issue() {
 
     if [ -d ${issuepath} ]; then
       echo ${issuepath} already exists -- consider cleaning up if this is an error
-      exit 255
+      return 0
     fi
 
     # Get the current CSR signed with dns-01 authentication. Place the result in

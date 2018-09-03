@@ -42,3 +42,8 @@ save-keys: preserve privkeys.tar.gpg
 	@echo privkeys.tar.gpg archive. If you lose this file, your replacement
 	@echo certificates are no longer usable.
 
+clear-dns-acme:
+	@[ -d /etc/letsencrypt/seed ] || ( echo "Only available at your key server"; exit 255 )
+	@echo
+	@echo Clearing remnant ACME DNS challenges from known domain names
+	./clear-well-known.sh

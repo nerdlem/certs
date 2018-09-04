@@ -12,7 +12,7 @@ Please see these posts for more information on how I use this:
 
 Each domain name for which you intent to have a certificate, should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
 
-```bash
+```
 $ mkdir my.domain
 $ rsync -avP ./lem.click/ ./my-domain/
    ⋮
@@ -20,7 +20,7 @@ $ rsync -avP ./lem.click/ ./my-domain/
 
 Then, edit the file `my.domain/template.conf` to customize the parameters of your certificate. Finally, use `make`:
 
-```bash
+```
 $ make
 make -C my-domain
 /usr/local/bin/gnutls-certtool --generate-privkey --outfile cert-0.key
@@ -41,7 +41,7 @@ Key parameters can be tweaked in the `Makefile.sub` file. You can have multiple 
 
 With a suitable SSH configuration, you can easily upload the required material to your server as follows:
 
-```bash
+```
 make HOST=my.server.name upload
    ⋮
 /usr/bin/rsync -avPR               \
@@ -69,7 +69,7 @@ lem.click/cert-3.pub
 
 The supplied `Makefile` includes targets `preserve` and `save-keys` that will assist in producing encrypted backups of your key material, for safekeeping. Note the setting of `GPGRECIPIENT` to select the GPG key to encrypt your backup to.
 
-```bash
+```
 make GPGRECIPIENT=lem@lem.click preserve
 /Applications/Xcode.app/Contents/Developer/usr/bin/make -C lem.click
 make[1]: Nothing to be done for 'all'.

@@ -47,7 +47,7 @@ make HOST=my.server.name upload
 /usr/bin/rsync -avPR               \
 		./lem.click/cert-0.* ⋯   \
 		./lem.click/cert-?.pub ⋯ \
-		root@background:/etc/letsencrypt/seed/
+		root@my.server.name:/etc/letsencrypt/seed/
 building file list ...
    ⋮
 lem.click/

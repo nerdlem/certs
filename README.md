@@ -71,7 +71,7 @@ The supplied `Makefile` includes targets `preserve` and `save-keys` that will as
 
 ```
 make GPGRECIPIENT=lem@lem.click preserve
-/Applications/Xcode.app/Contents/Developer/usr/bin/make -C lem.click
+make -C lem.click
 make[1]: Nothing to be done for 'all'.
 tar cf - ./lem.click/cert-*.key \
 		| gpg --encrypt --armor --recipient lem@lem.click > privkeys.tar.gpg \

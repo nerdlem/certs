@@ -23,15 +23,15 @@ Then, edit the file `my.domain/template.conf` to customize the parameters of you
 ```
 $ make
 make -C my-domain
-/usr/local/bin/gnutls-certtool --generate-privkey --outfile cert-0.key
+gnutls-certtool --generate-privkey --outfile cert-0.key
 Generating a 3072 bit RSA private key...
-/usr/local/bin/gnutls-certtool --load-privkey cert-0.key --pubkey-info --outfile cert-0.pub
-/usr/local/bin/gnutls-certtool --generate-request --load-privkey cert-0.key --template template.conf --outfile cert-0.csr
+gnutls-certtool --load-privkey cert-0.key --pubkey-info --outfile cert-0.pub
+gnutls-certtool --generate-request --load-privkey cert-0.key --template template.conf --outfile cert-0.csr
 Generating a PKCS #10 certificate request...
-/usr/local/bin/gnutls-certtool --generate-privkey --outfile cert-1.key
+gnutls-certtool --generate-privkey --outfile cert-1.key
 Generating a 3072 bit RSA private key...
-/usr/local/bin/gnutls-certtool --load-privkey cert-1.key --pubkey-info --outfile cert-1.pub
-/usr/local/bin/gnutls-certtool --generate-request --load-privkey cert-1.key --template template.conf --outfile cert-1.csr
+gnutls-certtool --load-privkey cert-1.key --pubkey-info --outfile cert-1.pub
+gnutls-certtool --generate-request --load-privkey cert-1.key --template template.conf --outfile cert-1.csr
    ⋮
 ```
 

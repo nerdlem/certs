@@ -1,4 +1,4 @@
-# Certificate hierarchy
+# Filesystem hierarchy for certificate management
 
 This is the file layout I use to manage key material for X509 certificate management. You should keep these files in a secure computer separate from the servers where you intend to use your certificates. Remember that compromising your private keys is worse than accidentally posting your password online.
 

@@ -1,4 +1,4 @@
-# Certificate hierarchy
+# Filesystem hierarchy for certificate management
 
 This is the file layout I use to manage key material for X509 certificate management. You should keep these files in a secure computer separate from the servers where you intend to use your certificates. Remember that compromising your private keys is worse than accidentally posting your password online.
 
@@ -12,7 +12,7 @@ Please see these posts for more information on how I use this:
 
 Each domain name for which you intent to have a certificate, should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
 
-```bash
+```
 $ mkdir my.domain
 $ rsync -avP ./lem.click/ ./my-domain/
    ⋮
@@ -20,18 +20,18 @@ $ rsync -avP ./lem.click/ ./my-domain/
 
 Then, edit the file `my.domain/template.conf` to customize the parameters of your certificate. Finally, use `make`:
 
-```bash
+```
 $ make
 make -C my-domain
-/usr/local/bin/gnutls-certtool --generate-privkey --outfile cert-0.key
+gnutls-certtool --generate-privkey --outfile cert-0.key
 Generating a 3072 bit RSA private key...
-/usr/local/bin/gnutls-certtool --load-privkey cert-0.key --pubkey-info --outfile cert-0.pub
-/usr/local/bin/gnutls-certtool --generate-request --load-privkey cert-0.key --template template.conf --outfile cert-0.csr
+gnutls-certtool --load-privkey cert-0.key --pubkey-info --outfile cert-0.pub
+gnutls-certtool --generate-request --load-privkey cert-0.key --template template.conf --outfile cert-0.csr
 Generating a PKCS #10 certificate request...
-/usr/local/bin/gnutls-certtool --generate-privkey --outfile cert-1.key
+gnutls-certtool --generate-privkey --outfile cert-1.key
 Generating a 3072 bit RSA private key...
-/usr/local/bin/gnutls-certtool --load-privkey cert-1.key --pubkey-info --outfile cert-1.pub
-/usr/local/bin/gnutls-certtool --generate-request --load-privkey cert-1.key --template template.conf --outfile cert-1.csr
+gnutls-certtool --load-privkey cert-1.key --pubkey-info --outfile cert-1.pub
+gnutls-certtool --generate-request --load-privkey cert-1.key --template template.conf --outfile cert-1.csr
    ⋮
 ```
 
@@ -41,13 +41,13 @@ Key parameters can be tweaked in the `Makefile.sub` file. You can have multiple 
 
 With a suitable SSH configuration, you can easily upload the required material to your server as follows:
 
-```bash
+```
 make HOST=my.server.name upload
    ⋮
 /usr/bin/rsync -avPR               \
 		./lem.click/cert-0.* ⋯   \
 		./lem.click/cert-?.pub ⋯ \
-		root@background:/etc/letsencrypt/seed/
+		root@my.server.name:/etc/letsencrypt/seed/
 building file list ...
    ⋮
 lem.click/
@@ -69,9 +69,9 @@ lem.click/cert-3.pub
 
 The supplied `Makefile` includes targets `preserve` and `save-keys` that will assist in producing encrypted backups of your key material, for safekeeping. Note the setting of `GPGRECIPIENT` to select the GPG key to encrypt your backup to.
 
-```bash
+```
 make GPGRECIPIENT=lem@lem.click preserve
-/Applications/Xcode.app/Contents/Developer/usr/bin/make -C lem.click
+make -C lem.click
 make[1]: Nothing to be done for 'all'.
 tar cf - ./lem.click/cert-*.key \
 		| gpg --encrypt --armor --recipient lem@lem.click > privkeys.tar.gpg \

@@ -19,6 +19,9 @@ NSUPDATE=${NSUPDATE:=`which nsupdate`}
 LOGGER_OPTS=${LOGGER_OPTS:=-p local3.info -t nsupdate-hook}
 NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
 
+CHALLENGE_DOMAIN=${CHALLENGE_DOMAIN:=${CERTBOT_DOMAIN}}
+CHALLENGE=${CHALLENGE:=_acme-challenge.${CHALLENGE_DOMAIN}}
+
 FOREIGNNS=${FOREIGNNS:=8.8.8.8}
 MASTER=${MASTER:=}
 SLEEPSECS=${SLEEPSECS:=5}
@@ -68,29 +71,26 @@ if [ "${missing}" != "" ]; then
   exit 2
 fi
 
-challenge="_acme-challenge.${CERTBOT_DOMAIN}"
-
 function perform_cleanup {
-  ${LOGGER} ${LOGGER_OPTS} "cleaunp ${challenge} ${CERTBOT_VALIDATION}"
+  ${LOGGER} ${LOGGER_OPTS} "cleaunp ${CHALLENGE} ${CERTBOT_VALIDATION}"
   if (  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
-    echo "update delete ${challenge} TXT ${CERTBOT_VALIDATION}";
+    echo "update delete ${CHALLENGE} TXT ${CERTBOT_VALIDATION}";
     echo send
   ) | ${NSUPDATE} -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
   then
-    ${LOGGER} ${LOGGER_OPTS} "removal of ${challenge} ${CERTBOT_VALIDATION} successful"
+    ${LOGGER} ${LOGGER_OPTS} "removal of ${CHALLENGE} ${CERTBOT_VALIDATION} successful"
     if [ "${VERBOSE}" == "" ]; then
-      echo Removed challenge ${challenge}
+      echo Removed challenge ${CHALLENGE}
     fi
   else
-    ${LOGGER} ${LOGGER_OPTS} "failed removal of ${challenge} ${CERTBOT_VALIDATION}"
-    echo Failed to remove challenge ${challenge}
+    ${LOGGER} ${LOGGER_OPTS} "failed removal of ${CHALLENGE} ${CERTBOT_VALIDATION}"
+    echo Failed to remove challenge ${CHALLENGE}
   fi
 }
 
 function verify_authorization {
   domain=$1
   token=$2
-  challenge="_acme-challenge.${domain}"
 
   nslist="/tmp/nslist-$$"
   rm -f "${nslist}"
@@ -100,15 +100,15 @@ function verify_authorization {
   ${DIG} +short NS "${domain}" >> "${nslist}"
 
   for ns in `cat "${nslist}"`; do
-    if ${DIG} +short IN TXT ${challenge} @${ns} | ${GREP} -F "${token}" > /dev/null
+    if ${DIG} +short IN TXT ${CHALLENGE} @${ns} | ${GREP} -F "${token}" > /dev/null
     then
-      ${LOGGER} ${LOGGER_OPTS} "validation of ${challenge} ${token} via ${ns} successful"
+      ${LOGGER} ${LOGGER_OPTS} "validation of ${CHALLENGE} ${token} via ${ns} successful"
       if [ "${VERBOSE}" == "" ]; then
-        echo "Validation of ${challenge} via ${ns} was successful"
+        echo "Validation of ${CHALLENGE} via ${ns} was successful"
       fi
     else
-      ${LOGGER} ${LOGGER_OPTS} "failed validation of ${challenge} ${token} via ${ns}"
-      echo "Failed validation for ${challenge} -- retrying"
+      ${LOGGER} ${LOGGER_OPTS} "failed validation of ${CHALLENGE} ${token} via ${ns}"
+      echo "Failed validation for ${CHALLENGE} -- retrying"
       rm -f "${nslist}"
       sleep 1
       return 255
@@ -121,30 +121,30 @@ function verify_authorization {
 
 function perform_authorization {
   if [ "${MASTER}" == "" ]; then
-    ${LOGGER} ${LOGGER_OPTS} "initialize challenge ${challenge} ${CERTBOT_VALIDATION}"
+    ${LOGGER} ${LOGGER_OPTS} "initialize challenge ${CHALLENGE} ${CERTBOT_VALIDATION}"
   else
-    ${LOGGER} ${LOGGER_OPTS} "initialize challenge ${challenge} ${CERTBOT_VALIDATION} with master ${MASTER}"
+    ${LOGGER} ${LOGGER_OPTS} "initialize challenge ${CHALLENGE} ${CERTBOT_VALIDATION} with master ${MASTER}"
   fi
 
   if (
     [ "${MASTER}" == "" ] || echo "server ${MASTER}";
-    echo "update add ${challenge} ${TTL} TXT ${CERTBOT_VALIDATION}";
+    echo "update add ${CHALLENGE} ${TTL} TXT ${CERTBOT_VALIDATION}";
     echo send
   ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
   then
-    ${LOGGER} ${LOGGER_OPTS} "challenge ${challenge} ${CERTBOT_VALIDATION} addedd successfully"
+    ${LOGGER} ${LOGGER_OPTS} "challenge ${CHALLENGE} ${CERTBOT_VALIDATION} addedd successfully"
     if [ "${VERBOSE}" == "" ]; then
-      echo Added challenge ${challenge}
+      echo Added challenge ${CHALLENGE}
     fi
 
     while ! verify_authorization "${CERTBOT_DOMAIN}" "${CERTBOT_VALIDATION}"; do
-      ${LOGGER} ${LOGGER_OPTS} "retry verification of ${challenge} ${CERTBOT_VALIDATION}"
+      ${LOGGER} ${LOGGER_OPTS} "retry verification of ${CHALLENGE} ${CERTBOT_VALIDATION}"
       sleep ${SLEEPSECS};
     done
 
   else
-    ${LOGGER} ${LOGGER_OPTS} "failed to add challenge ${challenge} ${CERTBOT_VALIDATION}"
-    echo Failed to add challenge ${challenge}
+    ${LOGGER} ${LOGGER_OPTS} "failed to add challenge ${CHALLENGE} ${CERTBOT_VALIDATION}"
+    echo Failed to add challenge ${CHALLENGE}
     exit 255
   fi
 }

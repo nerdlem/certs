@@ -13,9 +13,7 @@ Please see these posts for more information on how I use this:
 Each domain name for which you intent to have a certificate, should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
 
 ```
-$ mkdir my.domain
-$ rsync -avP ./lem.click/ ./my-domain/
-   ⋮
+./boostrap.sh my.domain
 ```
 
 Then, edit the file `my.domain/template.conf` to customize the parameters of your certificate. Finally, use `make`:

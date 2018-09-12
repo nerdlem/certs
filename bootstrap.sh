@@ -17,7 +17,7 @@ for domain in "$@"; do
 organization = "${CERT_ORG}"
 unit         = "${CERT_OU}"
 state        = "${CERT_STATE}"
-country      = "${CERT_STATE}"
+country      = "${CERT_COUNTRY}"
 cn           = "${domain}"
 
 # X.509 v3 extensions

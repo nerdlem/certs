@@ -97,7 +97,7 @@ function verify_authorization {
 
   [ "${FOREIGNNS}" == "" ] || ( echo "${FOREIGNNS}" > ${nslist} )
 
-  ${DIG} +short NS "${domain}" >> "${nslist}"
+  ${DIG} +short NS "${CHALLENGE_DOMAIN}" >> "${nslist}"
 
   for ns in `cat "${nslist}"`; do
     if ${DIG} +short IN TXT ${CHALLENGE} @${ns} | ${GREP} -F "${token}" > /dev/null

@@ -16,11 +16,18 @@ GREP=${GREP:=/bin/grep}
 LOGGER=${LOGGER:=/usr/bin/logger}
 NSUPDATE=${NSUPDATE:=`which nsupdate`}
 
+PROXY_MODE=${PROXY_MODE:=''}
+
 LOGGER_OPTS=${LOGGER_OPTS:=-p local3.info -t nsupdate-hook}
 NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
 
 CHALLENGE_DOMAIN=${CHALLENGE_DOMAIN:=${CERTBOT_DOMAIN}}
-CHALLENGE=${CHALLENGE:=_acme-challenge.${CHALLENGE_DOMAIN}}
+
+if [ "${PROXY_MODE}" = "domain" ]; then
+  CHALLENGE=${CHALLENGE:=_acme-challenge.${CERTBOT_DOMAIN}.${CHALLENGE_DOMAIN}}
+else
+  CHALLENGE=${CHALLENGE:=_acme-challenge.${CHALLENGE_DOMAIN}}
+fi
 
 FOREIGNNS=${FOREIGNNS:=8.8.8.8}
 MASTER=${MASTER:=}
@@ -72,7 +79,7 @@ if [ "${missing}" != "" ]; then
 fi
 
 function perform_cleanup {
-  ${LOGGER} ${LOGGER_OPTS} "cleaunp ${CHALLENGE} ${CERTBOT_VALIDATION}"
+  ${LOGGER} ${LOGGER_OPTS} "cleanup ${CHALLENGE} ${CERTBOT_VALIDATION}"
   if (  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
     echo "update delete ${CHALLENGE} TXT ${CERTBOT_VALIDATION}";
     echo send

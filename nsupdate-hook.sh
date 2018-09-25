@@ -107,7 +107,7 @@ function verify_authorization {
   ${DIG} +short NS "${CHALLENGE_DOMAIN}" >> "${nslist}"
 
   for ns in `cat "${nslist}"`; do
-    if ${DIG} +short IN TXT ${CHALLENGE} @${ns} | ${GREP} -F "${token}" > /dev/null
+    if ${DIG} +short IN TXT ${CHALLENGE} @${ns} | ${GREP} -F -- "${token}" > /dev/null
     then
       ${LOGGER} ${LOGGER_OPTS} "validation of ${CHALLENGE} ${token} via ${ns} successful"
       if [ "${VERBOSE}" == "" ]; then

@@ -139,7 +139,7 @@ function perform_authorization {
     echo send
   ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
   then
-    ${LOGGER} ${LOGGER_OPTS} "challenge ${CHALLENGE} ${CERTBOT_VALIDATION} addedd successfully"
+    ${LOGGER} ${LOGGER_OPTS} "challenge ${CHALLENGE} ${CERTBOT_VALIDATION} added successfully"
     if [ "${VERBOSE}" == "" ]; then
       echo Added challenge ${CHALLENGE}
     fi

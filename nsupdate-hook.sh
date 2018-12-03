@@ -81,7 +81,7 @@ fi
 function perform_cleanup {
   ${LOGGER} ${LOGGER_OPTS} "cleanup ${CHALLENGE} ${CERTBOT_VALIDATION}"
   if (  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
-    echo "update delete ${CHALLENGE} TXT ${CERTBOT_VALIDATION}";
+    echo "update delete ${CHALLENGE} TXT \"${CERTBOT_VALIDATION}\"";
     echo send
   ) | ${NSUPDATE} -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
   then
@@ -135,7 +135,7 @@ function perform_authorization {
 
   if (
     [ "${MASTER}" == "" ] || echo "server ${MASTER}";
-    echo "update add ${CHALLENGE} ${TTL} TXT ${CERTBOT_VALIDATION}";
+    echo "update add ${CHALLENGE} ${TTL} TXT \"${CERTBOT_VALIDATION}\"";
     echo send
   ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}
   then
@@ -165,3 +165,4 @@ else
 fi
 
 exit 0;
+

@@ -27,7 +27,9 @@ upload: $(SUBDIRS)
 		$(RUSER)@$(HOST):$(LESEED)/
 
 preserve: $(SUBDIRS)
-	tar cf - $(foreach p,$(SUBDIRS),$(p)/cert-*.key) \
+	tar cf -                                        \
+	  $(foreach p,$(SUBDIRS),$(p)/cert-*.key)       \
+		$(foreach p,$(SUBDIRS),$(p)/add-tlsa.sh)      \
 		| gpg --encrypt --armor --recipient $(GPGRECIPIENT) > privkeys.tar.gpg \
 		|| exit 255
 	@echo

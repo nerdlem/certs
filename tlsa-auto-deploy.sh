@@ -17,7 +17,7 @@ SHA512=${SHA512:=`which sha512sum`}
 
 MASTER=${MASTER:=}
 TSIGKEYFILE=${TSIGKEYFILE:=~/mykey.conf}
-TTL=${TTL:=2}
+TTL=${TTL:=86400}
 
 PUBKEYS=${PUBKEYS:=}
 PORT=${PORT:=*}

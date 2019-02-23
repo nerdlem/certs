@@ -21,8 +21,9 @@ clean:
 
 upload: $(SUBDIRS)
 	$(RSYNC) -avPR                                  \
-		$(foreach p,$(SUBDIRS),$(p)/cert-0.*)       \
-		$(foreach p,$(SUBDIRS),$(p)/cert-[1-9].pub) \
+		$(foreach p,$(SUBDIRS),$(p)/cert-0.*)         \
+		$(foreach p,$(SUBDIRS),$(p)/cert-[1-9].pub)   \
+		$(foreach p,$(SUBDIRS),$(p)/add-tlsa.sh)      \
 		$(RUSER)@$(HOST):$(LESEED)/
 
 preserve: $(SUBDIRS)

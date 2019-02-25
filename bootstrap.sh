@@ -38,4 +38,17 @@ tls_www_server
 encryption_key
 
 __TEMPLATE__
+
+  cat <<__ADDTLSA__ > "${domain}/add-tlsa.sh"
+#!/bin/bash
+#
+# add-tlsa.sh -- Run periodically to ensure TLSA records are in place
+
+# Start with a short TTL for testing. After all is ok, increase the TTL.
+# Additional domains can be appended below.
+
+TTL=60 \\
+PUBKEYS=/etc/letsencrypt/seed/${domain}/cert-*.pub \\
+tlsa-auto-deploy.sh ${domain}
+__ADDTLSA__
 done

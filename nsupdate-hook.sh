@@ -31,6 +31,7 @@ fi
 
 FOREIGNNS=${FOREIGNNS:=8.8.8.8}
 MASTER=${MASTER:=}
+AUTHNS=${AUTHNS:=}
 SLEEPSECS=${SLEEPSECS:=5}
 TSIGKEYFILE=${TSIGKEYFILE:=~/mykey.conf}
 TTL=${TTL:=2}
@@ -102,9 +103,15 @@ function verify_authorization {
   nslist="/tmp/nslist-$$"
   rm -f "${nslist}"
 
-  [ "${FOREIGNNS}" == "" ] || ( echo "${FOREIGNNS}" > ${nslist} )
+  [ "${FOREIGNNS}" == "" ] || ( echo "${FOREIGNNS}" > "${nslist}" )
+  [ "${AUTHNS}" == "" ] || ( echo "${AUTHNS}" | tr , '\n' >> "${nslist}" )
 
-  ${DIG} +short NS "${CHALLENGE_DOMAIN}" >> "${nslist}"
+  ${DIG} +noall +answer NS "${CHALLENGE_DOMAIN}" \
+    | egrep '\WNS\W' \
+    | awk '{ print $5 }' \
+    | sed 's/\.+$//' >> "${nslist}"
+
+  sort -i "${nslist}" -o "${nslist}" -u
 
   for ns in `cat "${nslist}"`; do
     if ${DIG} +short IN TXT ${CHALLENGE} @${ns} | ${GREP} -F -- "${token}" > /dev/null
@@ -165,4 +172,3 @@ else
 fi
 
 exit 0;
-

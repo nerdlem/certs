@@ -52,3 +52,6 @@ PUBKEYS=/etc/letsencrypt/seed/${domain}/cert-*.pub \\
 tlsa-auto-deploy.sh ${domain}
 __ADDTLSA__
 done
+
+chmod +x "${domain}/add-tlsa.sh"
+

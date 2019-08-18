@@ -20,7 +20,7 @@ clean:
 	for p in $(SUBDIRS); do $(MAKE) -C $$p clean; done
 
 upload: $(SUBDIRS)
-	$(RSYNC) -avPR                                  \
+	$(RSYNC) -avPR --no-perms --chmod=ug=rX               \
 		$(foreach p,$(SUBDIRS),$(p)/cert-0.*)         \
 		$(foreach p,$(SUBDIRS),$(p)/cert-[1-9].pub)   \
 		$(foreach p,$(SUBDIRS),$(p)/add-tlsa.sh)      \

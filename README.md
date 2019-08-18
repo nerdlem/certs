@@ -10,7 +10,7 @@ Please see these posts for more information on how I use this:
 * [Certificate Rotation with Let's Encrypt](https://lem.click/post/certificate-rotation-with-letsencrypt/)
 * [Multiple certs with Certbot](https://lem.click/post/multiple-certs-with-certbot/)
 
-Each domain name for which you intent to have a certificate, should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
+Each domain name for which you intend to have a certificate, should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
 
 ```
 ./boostrap.sh my.domain
@@ -37,7 +37,7 @@ After a few seconds, you should have 4 groups of CSRs, public and private keys s
 
 Key parameters can be tweaked in the `Makefile.sub` file. You can have multiple directory names representing multiple domains. This is useful to keep all your keys on a single location.
 
-With a suitable SSH configuration, you can easily upload the required material to your server as follows:
+With a suitable SSH configuration, you can easily upload the required material to your server as follows. You might want to review the note on filesystem permissions prior to running this command.
 
 ```
 make HOST=my.server.name upload
@@ -86,3 +86,28 @@ The resulting `.gpg` file should now be stored in a safe place, in case that the
 # Clearing pre-existing ACME challenges
 
 To assist with DNS zone hygiene, the included `clear-well-known.sh` script will delete all existing TXT DNS records under the `_acme-challenge` subdomain with configuration under `/etc/letsencrypt/seed`.
+
+# Note on directory permissions
+
+For the various environments I use, I tend to use symlinks so that different processes running under different identities can read the private keys as needed. My setup can look as follows, with each service typically having its own set of links so as to minimize changes to config files.
+
+```
+/etc/foo/tls/private.key ➜ /etc/letsencrypt/live/lem.click/privkey.pem
+/etc/letsencrypt/live/lem.click/privkey.pem ➜ /etc/letsencrypt/seed/lem.click/cert-0.key
+```
+
+Prior to uploading the key material, I setup the `seed` directory on my `/etc/letsencrypt` hierarchy with default ACL entries, so that any created files will inherit the required permissions.
+
+```bash
+mkdir /etc/letsencrypt/seed
+setfacl -b /etc/letsencrypt/seed
+setfacl -d -m g:certs:rx                  /etc/letsencrypt/seed/
+setfacl -d -m u:dovecot:rx,g:dovecot:rx   /etc/letsencrypt/seed/
+setfacl -d -m u:mail:rx,g:mail:rx         /etc/letsencrypt/seed/
+setfacl -d -m u:postgres:rx,g:postgres:rx /etc/letsencrypt/seed/
+setfacl -d -m u:smmsp:rx,g:smmsp:rx       /etc/letsencrypt/seed/
+setfacl -d -m u:smmta:rx,g:smmta:rx       /etc/letsencrypt/seed/
+setfacl -d -m u:www-data:rx,g:www-data:rx /etc/letsencrypt/seed/
+```
+
+This setup minimizes the amount of changes requiring when restarting services.

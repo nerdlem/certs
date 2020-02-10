@@ -1,6 +1,6 @@
 # Filesystem hierarchy for certificate management
 
-This is the file layout I use to manage key material for X509 certificate management. You should keep these files in a secure computer separate from the servers where you intend to use your certificates. Remember that compromising your private keys is worse than accidentally posting your password online.
+This is the file layout I use to manage key material for X.509 certificate management. You should keep these files in a secure computer separate from the servers where you intend to use your certificates. Remember that compromising your private keys is worse than accidentally posting your password online.
 
 The underlying rules in the Makefiles are based in GnuTLS. For this application there's really not much of a difference with OpenSSL. My choice was based on how easy is to configure the resulting CSRs.
 
@@ -63,6 +63,8 @@ lem.click/cert-3.pub
         2237 100%    1.07MB/s    0:00:00 (xfer#12, to-check=27/45)
 ```
 
+After uploading, it's a good idea to go over the services using your certificates to ensure everything is in order. Keep in mind that many services need to be fully restarted when updating key material.
+
 # Safekeeping your key material
 
 The supplied `Makefile` includes targets `preserve` and `save-keys` that will assist in producing encrypted backups of your key material, for safekeeping. Note the setting of `GPGRECIPIENT` to select the GPG key to encrypt your backup to.
@@ -77,15 +79,17 @@ tar cf - ./lem.click/cert-*.key \
 ⋮
 
 Keep the privkeys.tar.gpg in a safe place. This file contains the
-private keys for all of your certificates. If you lose or compromised
+private keys for all of your certificates. If you lose or compromise
 this file, certificates based in these keys will no longer be secure.
 ```
 
-The resulting `.gpg` file should now be stored in a safe place, in case that the key material needs to be restored for any purpose.
+You should now store the resulting `.gpg` file in a safe place, in case that the key material needs to be restored for any purpose, or keys need to be revoked. This is a very important – and often neglected – step.
 
 # Clearing pre-existing ACME challenges
 
 To assist with DNS zone hygiene, the included `clear-well-known.sh` script will delete all existing TXT DNS records under the `_acme-challenge` subdomain with configuration under `/etc/letsencrypt/seed`.
+
+This is generally not required for installations that do not use the `dns-01` challenge. However I tend to prefer this because I tend to centrally manage my certificates. I also like wildcard certificates for many scenarios, something that currently cannot be done using the more typical `http-01` challenge.
 
 # Note on directory permissions
 
@@ -110,4 +114,4 @@ setfacl -d -m u:smmta:rx,g:smmta:rx       /etc/letsencrypt/seed/
 setfacl -d -m u:www-data:rx,g:www-data:rx /etc/letsencrypt/seed/
 ```
 
-This setup minimizes the amount of changes requiring when restarting services.
+This setup minimizes the amount of changes required when restarting services, as all required processes will be able to read the certificate keys as required.

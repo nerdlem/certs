@@ -4,4 +4,4 @@
 
 TTL=2592000 \
 PUBKEYS=/etc/letsencrypt/seed/lem.click/cert-*.pub \
-tlsa-auto-deploy.sh lem.click lem.link lem.sexy
+tlsa-auto-deploy.sh lem.click lem.link lem.sexy lem.soy

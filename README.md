@@ -13,7 +13,7 @@ Please see these posts for more information on how I use this:
 Each domain name for which you intend to have a certificate, should have a directory containing a template file and a symlink to `Makefile.sub`. Do something like this:
 
 ```
-./boostrap.sh my.domain
+./bootstrap.sh my.domain
 ```
 
 Then, edit the file `my.domain/template.conf` to customize the parameters of your certificate. Finally, use `make`:

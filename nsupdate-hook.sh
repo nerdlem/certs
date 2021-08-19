@@ -18,6 +18,7 @@ NSUPDATE=${NSUPDATE:=`which nsupdate`}
 
 PROXY_MODE=${PROXY_MODE:=''}
 
+DIG_OPTS=${DIG_OPTS:=+noidnout}
 LOGGER_OPTS=${LOGGER_OPTS:=-p local3.info -t nsupdate-hook}
 NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
 
@@ -106,7 +107,7 @@ function verify_authorization {
   [ "${FOREIGNNS}" == "" ] || ( echo "${FOREIGNNS}" > "${nslist}" )
   [ "${AUTHNS}" == "" ] || ( echo "${AUTHNS}" | tr , '\n' >> "${nslist}" )
 
-  ${DIG} +noall +answer NS "${CHALLENGE_DOMAIN}" \
+  ${DIG} ${DIG_OPTS} +noall +answer NS "${CHALLENGE_DOMAIN}" \
     | egrep '\WNS\W' \
     | awk '{ print $5 }' \
     | sed 's/\.+$//' >> "${nslist}"
@@ -114,7 +115,7 @@ function verify_authorization {
   sort -i "${nslist}" -o "${nslist}" -u
 
   for ns in `cat "${nslist}"`; do
-    if ${DIG} +short IN TXT ${CHALLENGE} @${ns} | ${GREP} -F -- "${token}" > /dev/null
+    if ${DIG} ${DIG_OPTS} +short IN TXT ${CHALLENGE} @${ns} | ${GREP} -F -- "${token}" > /dev/null
     then
       ${LOGGER} ${LOGGER_OPTS} "validation of ${CHALLENGE} ${token} via ${ns} successful"
       if [ "${VERBOSE}" == "" ]; then

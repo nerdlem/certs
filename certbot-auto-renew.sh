@@ -29,7 +29,7 @@ export WEBROOT=${WEBROOT:=${LEROOT}/webroot}
 export SSLCERTCHECK=${SSLCERTCHECK:=/usr/bin/ssl-cert-check}
 export CERTBOT=${CERTBOT:=/usr/bin/certbot}
 
-export TEMPFILE=`tempfile`
+export TEMPFILE=`mktemp`
 
 if [ ! -x ${SSLCERTCHECK} ]; then
   echo ${SSLCERTCHECK} is required -- please install and try again

@@ -163,7 +163,7 @@ export -f check_and_issue
 # tens of certificates.
 
 find ${SEEDPATH} -mindepth 1 -maxdepth 1 -type d ${FINDOPTS}\
-  | xargs -L1 -I{} bash -c "check_and_issue {}"
+  | xargs -I{} bash -c "check_and_issue {}"
 
 # If certificates were processed successfuly, restart the services that use
 # the certificates to be sure the new ones are loaded.

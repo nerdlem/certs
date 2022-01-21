@@ -51,4 +51,4 @@ function clear_acme {
 export -f clear_acme
 
 find ${SEEDPATH} -mindepth 1 -maxdepth 1 -type d ${FINDOPTS}\
-| xargs -L1 -I{} bash -c "clear_acme {}"
+| xargs -I{} bash -c "clear_acme {}"

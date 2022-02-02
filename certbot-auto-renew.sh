@@ -99,7 +99,6 @@ check_and_issue() {
         --manual                      \
         --manual-auth-hook ${HOOK}    \
         --manual-cleanup-hook ${HOOK} \
-        --manual-public-ip-logging-ok \
         --non-interactive             \
         --preferred-challenges dns-01 \
         --quiet                       \

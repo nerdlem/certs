@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+SM_CERT_DIR=${SM_CERT_DIR:=/etc/letsencrypt/live/sendmail-domain}
+
+SM_SERVER_CRT=${SM_SERVER_CRT:=/etc/mail/tls/sendmail-server.crt}
+SM_CLIENT_CRT=${SM_CLIENT_CRT:=/etc/mail/tls/sendmail-client.crt}
+SM_COMMON_KEY=${SM_COMMON_KEY:=/etc/mail/tls/sendmail-common.key}
+
+SRC_CERT=${SRC_CERT:=${SM_CERT_DIR}/fullchain.pem}
+SRC_KEY=${SRC_KEY:=${SM_CERT_DIR}/privkey.pem}
+
+if [ "${SRC_KEY}" -nt "${SM_COMMON_KEY}" -o \! -f "${SM_COMMON_KEY}" ]; then
+ rm -f -- "${SM_COMMON_KEY}"
+ cp "${SRC_KEY}" "${SM_COMMON_KEY}"
+ changed=1
+fi
+
+if [ "${SRC_CERT}" -nt "${SM_SERVER_CRT}" -o \! -f "${SM_SERVER_CRT}" ]; then
+ rm -f -- "${SM_SERVER_CRT}"
+ cp "${SRC_CERT}" "${SM_SERVER_CRT}"
+ chown smmta:certs "${SM_SERVER_CRT}"
+ changed=1
+fi
+
+if [ "${SRC_CERT}" -nt "${SM_CLIENT_CRT}" -o \! -f "${SM_CLIENT_CRT}" ]; then
+ rm -f -- "${SM_CLIENT_CRT}"
+ cp "${SRC_CERT}" "${SM_CLIENT_CRT}"
+ chown smmta:certs "${SM_SERVER_CRT}"
+ changed=1
+fi
+
+if [ -n "${changed}" ]; then
+ systemctl restart sendmail
+fi
+
+exit 0

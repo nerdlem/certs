@@ -4,7 +4,7 @@
 # performs DNS-01 chanllenge authentication via RFC-2136 dynamic #updates
 # managed via the nsupdate tool.
 #
-# © 2017-2018 Luis E. Muñoz -- All Rights Reserved
+# © 2017-2022 Luis E. Muñoz -- All Rights Reserved
 
 set -e
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
@@ -21,8 +21,14 @@ PROXY_MODE=${PROXY_MODE:=''}
 DIG_OPTS=${DIG_OPTS:=+noidnout}
 LOGGER_OPTS=${LOGGER_OPTS:=-p local3.info -t nsupdate-hook}
 NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
+LEROOT=${LEROOT:=/etc/letsencrypt}
 
-CHALLENGE_DOMAIN=${CHALLENGE_DOMAIN:=${CERTBOT_DOMAIN}}
+if [ -f "${LEROOT}/proxy/domain/${CERTBOT_DOMAIN}" ]; then
+  CHALLENGE_DOMAIN=$(cat -- "${LEROOT}/proxy/domain/${CERTBOT_DOMAIN}" )
+  PROXY_MODE='domain'
+else
+  CHALLENGE_DOMAIN=${CHALLENGE_DOMAIN:=${CERTBOT_DOMAIN}}
+fi
 
 if [ "${PROXY_MODE}" = "domain" ]; then
   CHALLENGE=${CHALLENGE:=_acme-challenge.${CERTBOT_DOMAIN}.${CHALLENGE_DOMAIN}}

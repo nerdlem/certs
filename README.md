@@ -91,6 +91,12 @@ To assist with DNS zone hygiene, the included `clear-well-known.sh` script will 
 
 This is generally not required for installations that do not use the `dns-01` challenge. However I tend to prefer this because I tend to centrally manage my certificates. I also like wildcard certificates for many scenarios, something that currently cannot be done using the more typical `http-01` challenge.
 
+# Selective ACME dns-01 proxy authentication
+
+I have to deal with domain names that are served directly as well as domains served from third party authoritative DNS servers that do not support dynamic updates. In order to generate wildcard certificates for those domain names, `nsupdate-hook.sh` allows for specifying per-domain `$CHALLENGE_DOMAIN` names.
+
+Setting the required `CNAME` record as described in [Wildcard certificates with Let's Encrypt](https://lem.click/post/wildcard-certificates-with-letsencrypt/) and placing the correct `$CHALLENGE_DOMAIN` value as the contents of the `/etc/letsencrypt/proxy/domain/$CERTBOT_DOMAIN` causes `nsupdate-hook.sh` to automatically perform updates that will satisfy the authentication requirements to issue wildcard certificates.
+
 # Note on directory permissions
 
 For the various environments I use, I tend to use symlinks so that different processes running under different identities can read the private keys as needed. My setup can look as follows, with each service typically having its own set of links so as to minimize changes to config files.

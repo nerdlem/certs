@@ -23,6 +23,8 @@ LOGGER_OPTS=${LOGGER_OPTS:=-p local3.info -t nsupdate-hook}
 NSUPDATE_OPTS=${NSUPDATE_OPTS:=}
 LEROOT=${LEROOT:=/etc/letsencrypt}
 
+POST_VALIDATION_SLEEP=${POST_VALIDATION_SLEEP:=1}
+
 if [ -f "${LEROOT}/proxy/domain/${CERTBOT_DOMAIN}" ]; then
   CHALLENGE_DOMAIN=$(cat -- "${LEROOT}/proxy/domain/${CERTBOT_DOMAIN}" )
   PROXY_MODE='domain'
@@ -135,6 +137,9 @@ function verify_authorization {
       return 255
     fi
   done
+
+  ${LOGGER} ${LOGGER_OPTS} "Post-validation sleep"
+  sleep "${POST_VALIDATION_SLEEP}"
 
   rm -f "${nslist}"
   return 0

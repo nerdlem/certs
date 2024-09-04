@@ -33,6 +33,7 @@ function clear_acme {
     ${GNUTLS} --crq-info < "${csr}" | \
     egrep 'CN=|DNSname:' | \
     sed -e 's/^.*CN=//' -e 's/^.*DNSname: //' -e's/\*\.//' | \
+    awk '{ print $1 }' | \
     cut -f1 -d,
   done | sort -u > ${domainfile}
 

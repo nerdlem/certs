@@ -32,7 +32,8 @@ function clear_acme {
   for csr in "${seedpath}"/*.csr; do
     ${GNUTLS} --crq-info < "${csr}" | \
     egrep 'CN=|DNSname:' | \
-    sed -e 's/^.*CN=//' -e 's/^.*DNSname: //' -e's/\*\.//'
+    sed -e 's/^.*CN=//' -e 's/^.*DNSname: //' -e's/\*\.//' | \
+    cut -f1 -d,
   done | sort -u > ${domainfile}
 
   for domain in `cat ${domainfile}`; do

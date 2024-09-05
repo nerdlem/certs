@@ -38,13 +38,24 @@ function clear_acme {
   done | sort -u > ${domainfile}
 
   for domain in `cat ${domainfile}`; do
-    echo "Removing existing ACME challenges on ${domain}"
+    if [ -f "${LEROOT}/proxy/domain/${domain}" ]; then
+      CHALLENGE_DOMAIN=$(cat -- "${LEROOT}/proxy/domain/${domain}" )
+      PROXY_MODE='domain'
+    else
+      CHALLENGE_DOMAIN=${CHALLENGE_DOMAIN:=${domain}}
+    fi
+
+    if [ "${PROXY_MODE}" = "domain" ]; then
+      echo "Removing existing ACME challenges on ${domain} via ${CHALLENGE_DOMAIN} (proxy domain)"
+    else
+      echo "Directly removing existing ACME challenges on ${domain}"
+    fi
 
     ((  [ "${MASTER}" == "" ] || echo "server ${MASTER}";
-        echo "update delete _acme-challenge.${domain} ${TXT}";
+        echo "update delete _acme-challenge.${CHALLENGE_DOMAIN} ${TXT}";
         echo send
     ) | "${NSUPDATE}" -k "${TSIGKEYFILE}" ${NSUPDATE_OPTS}) || \
-    echo "Cleanup on ${domain} failed"
+    echo "Cleanup on ${CHALLENGE_DOMAIN} failed"
   done
 
   rm -f ${domainfile}

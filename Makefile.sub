@@ -5,8 +5,8 @@
 
 # Parameters -- Point this to GnuTLS's certtool
 
-GNUTLS=/usr/bin/certtool
-# GNUTLS=/usr/local/bin/gnutls-certtool
+GNUTLS?=/usr/bin/certtool
+# GNUTLS?=/usr/local/bin/gnutls-certtool
 
 # One suffix per key set
 

@@ -121,3 +121,16 @@ setfacl -d -m u:www-data:rx,g:www-data:rx /etc/letsencrypt/seed/
 ```
 
 This setup minimizes the amount of changes required when restarting services, as all required processes will be able to read the certificate keys as required.
+
+# Domain inventory
+
+You can compile a domain catalog file which is helpful to identify domain
+names being managed by underlying CSR files.
+
+```
+make domain-catalog.csv
+⋮
+```
+
+The resulting `domain-catalog.csv` file will contain a CSV listing summarizing
+the domains produced by each domain directory.

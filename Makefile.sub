@@ -12,6 +12,11 @@ GNUTLS?=/usr/bin/certtool
 
 SUFFIX=0 1 2 3
 
+all: $(foreach c,$(SUFFIX),cert-$(c).csr)
+
+clean: 
+	$(RM) *.csr *.key *.pub
+
 # How to generate key pairs and CSRs using Makefile rules
 
 %.csr: %.key template.conf
@@ -21,13 +26,22 @@ SUFFIX=0 1 2 3
 	$(GNUTLS) --generate-privkey --outfile $@
 	$(GNUTLS) --load-privkey $@ --pubkey-info --outfile $(basename $@).pub
 
+%.pub: %.key
+	$(GNUTLS) --load-privkey $< --pubkey-info --outfile $@
+
+show-domains: BUCKET := $(shell basename $(shell pwd))
+show-domains: cert-0.csr
+	@$(GNUTLS) --crq-info < $< \
+	  | grep --perl-regexp '^\s+(DNSname|Subject): ' \
+	  | sed -e 's/^.*CN=//' \
+	        -e 's/^.*DNSname: //' \
+			-e 's/,.*$$//' \
+			-e 's/^/$(BUCKET),/' \
+	  | sort \
+	  | uniq
+
 # Do not remove the key files automatically
 
 .SECONDARY: $(foreach c,$(SUFFIX),cert-$(c).key)
-
-all: $(foreach c,$(SUFFIX),cert-$(c).csr)
-
-clean: 
-	$(RM) *.csr *.key *.pub
 
 

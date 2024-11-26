@@ -20,11 +20,21 @@ clean:
 	for p in $(SUBDIRS); do $(MAKE) -C $$p clean; done
 
 upload: $(SUBDIRS)
-	$(RSYNC) -avPR --no-perms --chmod=ug=rX               \
+	$(RSYNC) -avPR --no-perms --chmod=ug=rX           \
 		$(foreach p,$(SUBDIRS),$(p)/cert-0.*)         \
 		$(foreach p,$(SUBDIRS),$(p)/cert-[1-9].pub)   \
 		$(foreach p,$(SUBDIRS),$(p)/add-tlsa.sh)      \
 		$(RUSER)@$(HOST):$(LESEED)/
+
+domain-catalog.csv: TMPFILE := $(shell mktemp)
+domain-catalog.csv: $(SUBDIRS)
+	@rm -f $(TMPFILE); echo > $(TMPFILE)
+	@for p in $(SUBDIRS); do \
+		$(MAKE) -C $$p show-domains \
+		  2>&1 >> $(TMPFILE); \
+	done
+	@cp $(TMPFILE) $@
+	@rm -f $(TMPFILE)
 
 preserve: $(SUBDIRS)
 	tar cf -                                        \
